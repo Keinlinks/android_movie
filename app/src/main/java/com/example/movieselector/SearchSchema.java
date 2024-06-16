@@ -1,10 +1,10 @@
 package com.example.movieselector;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public class SearchSchema {
-    public ArrayList<Search> search;
+    public List<Search> Search;
     public String totalResults;
-    public String response;
+    public String Response;
 }
 

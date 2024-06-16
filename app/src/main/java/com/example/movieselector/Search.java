@@ -1,9 +1,9 @@
 package com.example.movieselector;
 
 public class Search{
-    public String title;
-    public String year;
-    public String imdbID;
-    public String type;
-    public String poster;
+    public String Title;
+    public String Year;
+    public String ImdbID;
+    public String Type;
+    public String Poster;
 }
