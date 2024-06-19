@@ -4,22 +4,20 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
+import android.content.Intent;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.google.android.flexbox.FlexboxLayout;
 
-import java.util.ArrayList;
+import com.squareup.picasso.Picasso;
+
 import java.util.List;
 
 import retrofit2.Call;
@@ -27,13 +25,13 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
-
+    int page = 1;
+    String query = "";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-
-        Toast.makeText(this,"Iniciando aplicacion",Toast.LENGTH_SHORT).show();
+        setContentView(R.layout.activity_main);
 
     }
 
@@ -41,27 +39,30 @@ public class MainActivity extends AppCompatActivity {
         EditText searchText = findViewById(R.id.searchText);
 
         String query = searchText.getText().toString();
+        if(query.length() > 3){
+            FlexboxLayout parentLayout = findViewById(R.id.flexboxLayout);
+            parentLayout.removeAllViews();
+            this.page = 1;
+            this.query = query;
+            this.search(query, 1);
+        }
+    }
 
+    void search(String query,int page){
         MovieI movieApi = MovieApi.getRetrofitInstance().create(MovieI.class);
 
-        Call<SearchSchema> call = movieApi.getMovies(MovieApi.API_KEY,query);
+        Call<SearchSchema> call = movieApi.getMovies(MovieApi.API_KEY,query,page);
         call.enqueue(new Callback<SearchSchema>() {
             @Override
             public void onResponse(Call<SearchSchema> call, Response<SearchSchema> response) {
                 if (response.isSuccessful()) {
-                    Gson gson = new GsonBuilder().setPrettyPrinting().create();
-                    String jsonResponse = gson.toJson(response.body());
-                    Log.d("respuesta: ", jsonResponse);
-
                     SearchSchema s = response.body();
+                    if(s == null) return;
                     List<Search> movies = s.Search;
+                    if(movies == null) return;
                     createDynamicLayout(movies);
-                    if(movies ==null) return;
-                    for(Search movie: movies){
-                        if(movie != null && movie.Title != null){
-                            Log.d("movie: ", movie.Title);
-                        }
-                    }
+                    Button load = findViewById(R.id.load_data);
+                    load.setVisibility(View.VISIBLE);
                     Toast.makeText(MainActivity.this, "Exitoso: " + response.code(), Toast.LENGTH_SHORT).show();
                 } else {
                     Log.d("error_2", "response vacio");
@@ -74,18 +75,23 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(MainActivity.this,"ERROR",Toast.LENGTH_SHORT);
             }
         });
+    }
 
+    public void nextPage(View view){
+        this.page = this.page + 1;
+        search(this.query,this.page);
     }
     private void createDynamicLayout(List<Search> data) {
-        LinearLayout parentLayout = findViewById(R.id.flexboxLayout); // El LinearLayout padre en tu XML
-        if(parentLayout == null) return;
+        FlexboxLayout parentLayout = findViewById(R.id.flexboxLayout); // El LinearLayout padre en tu XML
+        if(parentLayout == null || data == null) return;
         for (Search item : data) {
 
             LinearLayout linearLayout = new LinearLayout(this);
             LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT
             );
+            linearLayout.setMinimumHeight(150);
             layoutParams.setMargins(15, 0, 15, 0);
             linearLayout.setLayoutParams(layoutParams);
             linearLayout.setOrientation(LinearLayout.VERTICAL);
@@ -100,18 +106,55 @@ public class MainActivity extends AppCompatActivity {
             textView.setText(item.Title);
 
             ImageButton imageButton = new ImageButton(this);
+            imageButton.setTag(item.imdbID);
+
             LinearLayout.LayoutParams imageLayoutParams = new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.WRAP_CONTENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT
             );
             imageLayoutParams.gravity = Gravity.CENTER;
             imageButton.setLayoutParams(imageLayoutParams);
+            Picasso.get()
+                    .load(item.Poster)
+                    .into(imageButton, new com.squareup.picasso.Callback() {
+                        @Override
+                        public void onSuccess() {
+                            imageButton.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
 
+                                    String imdbId = (String) v.getTag();
+
+                                    if(imdbId == null) return;
+
+                                    openDetails(imdbId);
+                                }
+                            });
+                        }
+
+                        @Override
+                        public void onError(Exception e) {
+
+                        }
+                    });
 
             linearLayout.addView(textView);
             linearLayout.addView(imageButton);
 
             parentLayout.addView(linearLayout);
+            imageButton.setOnClickListener(v -> {
+
+            });
+
+
         }
+    }
+
+    void openDetails(String id){
+        Intent intent = new Intent(MainActivity.this,detailsActivity.class);
+        Log.d("id main activity: ",id);
+        intent.putExtra("id",id);
+        intent.putExtra("apiKey",MovieApi.API_KEY);
+        startActivity(intent);
     }
 }

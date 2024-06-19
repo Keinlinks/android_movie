@@ -25,16 +25,19 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:id="@+id/linear"
+            >
 
             <EditText
                 android:id="@+id/searchText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
                 android:ems="10"
                 android:hint="@string/button_search_text"
                 android:inputType="text"
-                android:padding="8dp"
+                android:padding="16dp"
                 android:textSize="16sp" />
 
             <Button
@@ -50,10 +53,29 @@
                 android:layout_height="match_parent"
                 android:padding="16dp"
                 app:flexWrap="wrap"
-                app:justifyContent="flex_start">
+                app:justifyContent="center">
 
 
             </com.google.android.flexbox.FlexboxLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center_horizontal"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/load_data"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:foregroundGravity="center"
+                    android:onClick="nextPage"
+                    android:text="@string/button_load"
+                    android:visibility="invisible" />
+
+            </LinearLayout>
         </LinearLayout>
     </ScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>

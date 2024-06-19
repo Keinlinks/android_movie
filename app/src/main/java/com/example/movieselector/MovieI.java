@@ -8,5 +8,8 @@ import retrofit2.http.Query;
 
 public interface MovieI {
     @GET("/")
-    Call<SearchSchema> getMovies(@Query("apikey") String apiKey, @Query("s") String title);
+    Call<SearchSchema> getMovies(@Query("apikey") String apiKey, @Query("s") String title, @Query("page") int page);
+
+    @GET("/")
+    Call<GetDetailsSchema> getDetails(@Query("apiKey") String apiKey, @Query("i") String id);
 }
