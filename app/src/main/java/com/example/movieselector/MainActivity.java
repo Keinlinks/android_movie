@@ -8,6 +8,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.content.Intent;
@@ -27,12 +29,29 @@ import retrofit2.Response;
 public class MainActivity extends AppCompatActivity {
     int page = 1;
     String query = "";
+
+    private RadioGroup radioGroup;
+    private RadioButton series_radius, movie_radius, episodes_radius;
+
+    private String type;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
-
+        radioGroup = findViewById(R.id.radioGroup);
+        series_radius = findViewById(R.id.series_radius);
+        movie_radius = findViewById(R.id.movies_radius);
+        episodes_radius = findViewById(R.id.episodes_radius);
+        this.type = "series";
+        radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                RadioButton selectedRadioButton = findViewById(checkedId);
+                String selectedType =selectedRadioButton.getTag().toString();
+                type = selectedType;
+            }
+        });
     }
 
     public void searchSubmit(View view){
@@ -51,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
     void search(String query,int page){
         MovieI movieApi = MovieApi.getRetrofitInstance().create(MovieI.class);
 
-        Call<SearchSchema> call = movieApi.getMovies(MovieApi.API_KEY,query,page);
+        Call<SearchSchema> call = movieApi.getMovies(MovieApi.API_KEY,query,page,this.type);
         call.enqueue(new Callback<SearchSchema>() {
             @Override
             public void onResponse(Call<SearchSchema> call, Response<SearchSchema> response) {

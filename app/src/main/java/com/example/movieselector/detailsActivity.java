@@ -57,7 +57,7 @@ public class detailsActivity extends AppCompatActivity {
 
                     TextView description_view = findViewById(R.id.descripcion);
 
-                    String description = "Descripcion: " + s.getPlot();
+                    String description = "Descripción: " + s.getPlot();
 
                     description_view.setText(description);
                 }
